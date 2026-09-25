@@ -8,13 +8,15 @@ const authenticate = (source = 'header') => {
     
     // for admin reads the httpOnly `accessToken` cookie
     if (source === 'cookie') {
-      token = req.cookies?.accessToken;
+      token = req.cookies?.accessToken; //? shows if there is no token
     } else {
         //for normal users reads `Authorization: Bearer <token>`
       const authHeader = req.headers.authorization;
       if (authHeader && authHeader.startsWith('Bearer ')) {
         token = authHeader.split(' ')[1];
       }
+
+      //const token = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ","")
     }
 
     if (!token) {
@@ -22,6 +24,7 @@ const authenticate = (source = 'header') => {
     }
 
     try {
+        //decode token
       const payload = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
       req.user = {
         userId: payload.userId,
