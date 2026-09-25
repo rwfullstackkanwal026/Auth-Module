@@ -61,20 +61,6 @@ userSchema.pre('save' , async function (){
     this.password = await bcrypt.hash(this.password , salt)
 })
 
-// generate tokenn
-userSchema.methods.createJWT = function (){
-    return jwt.sign(
-        {
-            userId: this._id , name: this.name , role: this.role
-        },
-        process.env.JWT_SECRET, 
-        {
-            expiresIn:process.env.JWT_LIFETIME
-        }
-    )
-}
-
-
 // compare password
 userSchema.methods.comparePassword = async function(candidatePassword) // pass entering from user
 {
@@ -87,10 +73,10 @@ userSchema.methods.comparePassword = async function(candidatePassword) // pass e
 userSchema.methods.generateAccessToken = function() {
     return jwt.sign(
         {
-            _id: this._id,
+            userId: this._id,
             email: this.email,
             username: this.username,
-            fullName: this.fullName
+            role: this.role
         },
         process.env.ACCESS_TOKEN_SECRET,
         {
@@ -103,7 +89,7 @@ userSchema.methods.generateAccessToken = function() {
 userSchema.methods.generateRefreshToken = function() {
     return jwt.sign(
         {
-            _id: this._id,
+            userId: this._id,
         },
         process.env.REFRESH_TOKEN_SECRET,
         {

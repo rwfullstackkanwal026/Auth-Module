@@ -1,11 +1,14 @@
 const User = require('../Models/user')
 const { StatusCodes } = require('http-status-codes');
-const {BadRequestError, UnauthenticatedError , CustomAPIError} = require('../Errors ')
+const { BadRequestError, UnauthenticatedError } = require('../Errors')
 
-
+const cookieOptions = {
+  // modieifed by server only
+  httpOnly: true, 
+  secure: true 
+};
 
 const generateAccessAndRefreshTokens = async (userId) => {
-  try {
     const user = await User.findById(userId)
     const accessToken = user.generateAccessToken()
     const refreshToken = user.generateRefreshToken()
@@ -17,29 +20,28 @@ const generateAccessAndRefreshTokens = async (userId) => {
 
     return {accessToken , refreshToken}
 
-
-
-
-  } catch (error) {
-    throw new CustomAPIError("Something went wrong while generating refresh and access token")
-  }
 }
 
 const register = async (req, res ) =>{
 
-    const user = await User.create({...req.body})
+    const { username, fullName, email, password } = req.body;
 
-    const token = user.createJWT()
+    const user = await User.create({ username, fullName, email, password });
+
+    const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(user._id);
 
     res.status(StatusCodes.CREATED).json({
-    user: {
-      id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role
-    },
-    token
-  });
+      message: 'Registration successful',
+      user: {
+        id: user._id,
+        username: user.username,
+        fullName: user.fullName,
+        email: user.email,
+        role: user.role,
+      },
+      accessToken,
+      refreshToken,
+    });
 }
 
 
@@ -47,14 +49,15 @@ const register = async (req, res ) =>{
 const login = async (req,res ) =>{
     const {email, username, password} = req.body
     
-    if(!email || !username || !password){
+    if((!email && !username) || !password){
         throw new BadRequestError("Please Provide email and password")
     }
 
     // const user = await User.findOne({ email });
     const user = await User.findOne({ 
       $or: [{username}, {email}]
-    });
+    })
+    .select('+password')
 
     if(!user){
         throw new UnauthenticatedError("Invalid credentials")
@@ -69,20 +72,46 @@ const login = async (req,res ) =>{
     const {accessToken, refreshToken} = await 
     generateAccessAndRefreshTokens(user._id)
 
-    const loggedInUser = await User.findById(user._id)
-    .select("-password -refreshToken") // fields not needed
-    
-    res.status(StatusCodes.CREATED).json({
+    //user info without password
+    const safeUser = {
+    id: user._id,
+    username: user.username,
+    fullName: user.fullName,
+    email: user.email,
+    role: user.role,
+  };
+
+
+  if (user.role === 'admin') {
+    return res
+      .status(StatusCodes.OK)
+      //create cookie                        // ... spread operator copies properties from cookieOptions
+      .cookie('accessToken', accessToken, { ...cookieOptions, maxAge: 15 * 60 * 1000 }) // 15 min
+      .cookie('refreshToken', refreshToken, { ...cookieOptions, maxAge: 7 * 24 * 60 * 60 * 1000 }) // 7 days
+      .json({ message: 'Login successful', user: safeUser });
+  }
+
+  return res.status(StatusCodes.OK).json({
     message: 'Login successful',
-    user: {
-      id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role
-    },
-    token
+    user: safeUser,
+    accessToken,
+    refreshToken,
   });
+    
 }
+
+//logout user
+const logout = async (req, res) => {
+  //Remove the refresh token from the database
+  await User.findByIdAndUpdate(req.user.userId, { refreshToken: '' });
+
+  if (req.user.role === 'admin') {
+    res.clearCookie('accessToken', cookieOptions);
+    res.clearCookie('refreshToken', cookieOptions);
+  }
+
+  res.status(StatusCodes.OK).json({ message: 'Logged out successfully' });
+};
 
 
 module.exports = {

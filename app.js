@@ -33,7 +33,7 @@ app.get('/', (req, res) => {
 
 const startServer = async ()=>{
     try {
-        connectDb(process.env.MONGO_URI)
+        await connectDb(process.env.MONGO_URI)
         app.listen(port, ()=>{
          console.log(`Server is listening on port ${port}`);}
         )
