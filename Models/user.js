@@ -44,6 +44,10 @@ role: {
     enum: ['user', 'admin'],
     default: 'user'
 },
+profileImage: {
+      type: String,
+      default: '',
+    },
 refreshToken: {
     type: String
 }

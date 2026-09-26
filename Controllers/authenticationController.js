@@ -113,9 +113,50 @@ const logout = async (req, res) => {
   res.status(StatusCodes.OK).json({ message: 'Logged out successfully' });
 };
 
+const updatePassword = async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+
+  if (!currentPassword || !newPassword) {
+    throw new BadRequestError('Please provide current and new password');
+  }
+
+  const user = await User.findById(req.user.userId).select('+password');
+
+  const isPasswordCorrect = await user.comparePassword(currentPassword);
+  if (!isPasswordCorrect) {
+    throw new UnauthenticatedError('Current password is incorrect');
+  }
+
+  user.password = newPassword; // the pre('save') hook in the model hashes it automatically
+  await user.save();
+
+  res.status(StatusCodes.OK).json({ message: 'Password updated successfully' });
+};
+
+const updateProfileImage = async (req, res) => {
+  if (!req.file) {
+    throw new BadRequestError('Please upload an image file');
+  }
+
+  const imagePath = `/uploads/${req.file.filename}`;
+
+  const user = await User.findByIdAndUpdate(
+    req.user.userId,
+    { profileImage: imagePath },
+    { new: true }
+  );
+
+  res.status(StatusCodes.OK).json({
+    message: 'Profile image updated successfully',
+    profileImage: user.profileImage,
+  });
+};
+
 
 module.exports = {
     register,
     login,
-    logout
+    logout,
+    updatePassword,
+     updateProfileImage
 }

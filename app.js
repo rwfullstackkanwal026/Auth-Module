@@ -2,6 +2,7 @@ const express = require('express')
 const app = express()
 
 require('dotenv').config()
+const path = require('path');
 
 const cookieParser = require('cookie-parser')
 const cors = require('cors')
@@ -25,6 +26,7 @@ const port = process.env.PORT  || 3000
 app.use(express.json()) //allows your server to understand JSON data.
 app.use(cookieParser())  //allows us to read cookies.
 app.use(cors()) // allows requests from another frontend such as React.
+app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // makes saved images viewable at http://localhost:3000/uploads/filename.jpg
 
 
 
