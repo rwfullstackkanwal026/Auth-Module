@@ -38,4 +38,14 @@ const authenticate = (source = 'header') => {
   };
 };
 
-module.exports = { authenticate};
+// if person accessing the route is not user or admin
+const authorizeRoles = (...roles) => {
+  return (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+      throw new UnauthenticatedError('Not authorized to access this route');
+    }
+    next();
+  };
+};
+
+module.exports = { authenticate, authorizeRoles};
