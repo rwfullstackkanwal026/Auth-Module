@@ -1,13 +1,20 @@
 const express = require('express')
 const app = express()
 
+require('dotenv').config()
+
 const cookieParser = require('cookie-parser')
 const cors = require('cors')
 
 
 const connectDb = require('./Db/connect')
 const authRoutes = require('./Routes/authRoutes');
-require('dotenv').config()
+const adminRoutes = require('./Routes/adminRoute');
+
+
+const notFound = require('./Middlewares/not-found');
+const errorHandlerMiddleware = require('./Middlewares/error-handler');
+
 
 const port = process.env.PORT  || 3000
 
@@ -19,8 +26,7 @@ app.use(express.json()) //allows your server to understand JSON data.
 app.use(cookieParser())  //allows us to read cookies.
 app.use(cors()) // allows requests from another frontend such as React.
 
-//routes
-app.use('/api/auth', authRoutes);
+
 
 app.get('/', (req, res) => {
   res.json({
@@ -28,6 +34,13 @@ app.get('/', (req, res) => {
   });
 });
 
+//routes
+app.use('/api/auth', authRoutes);
+app.use('/api/admin', adminRoutes);
+
+
+app.use(notFound);
+app.use(errorHandlerMiddleware);
 
 
 
