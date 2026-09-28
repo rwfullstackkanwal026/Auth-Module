@@ -54,10 +54,16 @@ const login = async (req,res ) =>{
     }
 
     // const user = await User.findOne({ email });
-    const user = await User.findOne({ 
-      $or: [{username}, {email}]
-    })
-    .select('+password')
+    // const user = await User.findOne({ 
+    //   $or: [{username}, {email}]
+    // })
+    // .select('+password')
+    const user = await User.findOne({
+      $or: [
+        { username: username?.toLowerCase() },
+        { email: email?.toLowerCase() },
+      ],
+    }).select('+password');
 
     if(!user){
         throw new UnauthenticatedError("Invalid credentials")

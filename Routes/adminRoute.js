@@ -8,6 +8,7 @@ const { getAllUsers, updateUserRole } = require('../Controllers/adminController'
 // every route below requires a valid admin cookie AND role === 'admin'
 router.use(authenticate('cookie'), authorizeRoles('admin'));
 
+
 router.post('/logout', logout);
 
 router.get('/dashboard', (req, res) => {

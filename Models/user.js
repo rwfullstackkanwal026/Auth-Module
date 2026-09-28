@@ -28,6 +28,7 @@ email: {
     minlength: 6,
     maxlength: 50,
     trim: true,
+     lowercase: true, 
     unique: true, //already exists so duplicate error will be thrown
     match: [
         /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
@@ -37,7 +38,8 @@ password: {
     type: String,
     required: [true, 'Please provide password'],
     minlength: 6,
-    maxlength: 100
+    maxlength: 100,
+    select: false,
 },
 role: {
     type: String,
@@ -49,7 +51,8 @@ profileImage: {
       default: '',
     },
 refreshToken: {
-    type: String
+    type: String,
+     select: false,
 }
 },
 { 

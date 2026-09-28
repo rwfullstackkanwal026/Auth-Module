@@ -10,11 +10,11 @@ const storage = multer.diskStorage({ //I want to save uploaded files on my serve
 Multer expects you to tell it:
 
 "Did everything go correctly, and where should I save the file?" */
-    cb(null, 'uploads/'); // null means no error
+    cb(null, 'uploads/'); // null means no error /uploads folder
   },
   filename: (req, file, cb) => {
     // req.user exists here because authenticate() runs BEFORE this middleware in the route
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9); // 1 × 10⁹
     cb(null, `${req.user.userId}-${uniqueSuffix}${path.extname(file.originalname)}`);
   },
 });
@@ -24,7 +24,7 @@ const fileFilter = (req, file, cb) => {
   if (!allowedTypes.includes(file.mimetype)) {
     return cb(new BadRequestError('Only jpeg, png, and webp images are allowed'));
   }
-  cb(null, true);
+  cb(null, true);// no error Accept the file.
 };
 
 const upload = multer({
