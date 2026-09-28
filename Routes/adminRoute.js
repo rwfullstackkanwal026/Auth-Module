@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-const { authenticate, authorizeRoles } = require('../Middleware/authentication');
+const { authenticate, authorizeRoles } = require('../Middlewares/authentication');
 const { logout } = require('../Controllers/authenticationController');
 const { getAllUsers, updateUserRole } = require('../Controllers/adminController');
 

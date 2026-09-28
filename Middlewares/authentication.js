@@ -18,10 +18,14 @@ const authenticate = (source = 'header') => {
 
       //const token = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ","")
     }
+    console.log('source:', source);
+console.log('Authorization header:', req.headers.authorization);
+console.log('token:', token);
 
     if (!token) {
       throw new UnauthenticatedError('Authentication invalid');
     }
+     console.log('Token received:', token);
 
     try {
         //decode token

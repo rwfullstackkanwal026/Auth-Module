@@ -1,10 +1,16 @@
-const multer = require('multer'); // for image uploads
-const path = require('path');
+const multer = require('multer'); // Multer is an Express middleware used for handling file uploads.
+const path = require('path'); // We need it here to get the extension of the uploaded file.
 const { BadRequestError } = require('../Errors');
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/');
+const storage = multer.diskStorage({ //I want to save uploaded files on my server's disk.
+  destination: (req, file, cb) => { //where to save the uploaded file.
+    // file This contains information about the uploaded file.
+    /* cb means callback.
+
+Multer expects you to tell it:
+
+"Did everything go correctly, and where should I save the file?" */
+    cb(null, 'uploads/'); // null means no error
   },
   filename: (req, file, cb) => {
     // req.user exists here because authenticate() runs BEFORE this middleware in the route

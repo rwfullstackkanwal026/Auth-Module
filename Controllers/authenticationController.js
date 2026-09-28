@@ -3,9 +3,9 @@ const { StatusCodes } = require('http-status-codes');
 const { BadRequestError, UnauthenticatedError } = require('../Errors')
 
 const cookieOptions = {
-  // modieifed by server only
-  httpOnly: true, 
-  secure: true 
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'strict',
 };
 
 const generateAccessAndRefreshTokens = async (userId) => {
@@ -126,8 +126,8 @@ const updatePassword = async (req, res) => {
   if (!isPasswordCorrect) {
     throw new UnauthenticatedError('Current password is incorrect');
   }
-
-  user.password = newPassword; // the pre('save') hook in the model hashes it automatically
+  // the pre('save') hook in the model hashes it automatically
+  user.password = newPassword; 
   await user.save();
 
   res.status(StatusCodes.OK).json({ message: 'Password updated successfully' });
